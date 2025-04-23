@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class CharacterStats : MonoBehaviour
 {
+    private EntityFX fx;
+
     [Header("Major stats")]
     public Stat strength; //力量 增强伤害 百分比增加
     public Stat agility; //敏捷 增强闪避率 暴击率 百分比增加
@@ -36,13 +38,17 @@ public class CharacterStats : MonoBehaviour
     private float chilledTimer;
     private float shockedTimer;
 
-    [SerializeField] private int currentHealth;
+    public int currentHealth;
+
+    public System.Action onHealthChanged;
 
     protected virtual void Start()
     {
         critChance.SetDefultValue(5);
         critPower.SetDefultValue(150);
-        currentHealth = maxHealth.GetValue();
+        currentHealth = GetMaxHealthValue();
+
+        fx = GetComponent<EntityFX>();
     }
 
     void Update()
@@ -65,7 +71,7 @@ public class CharacterStats : MonoBehaviour
 
         if (ignitedDamageTimer < 0 && isIgnited)
         {
-            currentHealth -= (int)ignitedDamage;
+            DecreaseHealthBy((int)ignitedDamage);
             ignitedDamageTimer = ignitedDamageCooldown;
 
             if (currentHealth <= 0)
@@ -144,6 +150,8 @@ public class CharacterStats : MonoBehaviour
         {
             isIgnited = _ignited;
             ignitedTimer = 4;
+
+            fx.IgniteFxFor(ignitedTimer);
         }
         if(_chill)
         {
@@ -178,7 +186,8 @@ public class CharacterStats : MonoBehaviour
         totalDamage = CheckTargetArmor(_targetStats, totalDamage);
 
         //造成伤害
-        _targetStats.TakeDamage(totalDamage);
+        //_targetStats.TakeDamage(totalDamage);
+        DoMagicDamage(_targetStats);
     }
 
 
@@ -214,7 +223,7 @@ public class CharacterStats : MonoBehaviour
     //承受伤害函数
     public virtual void TakeDamage(int _damage)
     {
-        currentHealth -= _damage;
+        DecreaseHealthBy(_damage);
 
         if (currentHealth <= 0)
             Die();
@@ -234,6 +243,18 @@ public class CharacterStats : MonoBehaviour
         return false;
     }
     #endregion
+    //最大血量上限函数
+    public int GetMaxHealthValue()
+    {
+        return maxHealth.GetValue() + vitality.GetValue() * 5;
+    }
+    //血量下降函数
+    protected virtual void DecreaseHealthBy(int _damage)
+    {
+        currentHealth -= _damage;
+        if (onHealthChanged != null)
+            onHealthChanged();
+    }
 
     //实体死亡函数
     protected virtual void Die()

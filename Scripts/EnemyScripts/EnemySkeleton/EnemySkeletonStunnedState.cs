@@ -25,7 +25,7 @@ public class EnemySkeletonStunnedState : EnemyState
     {
         base.Exit();
 
-        enemy.fx.Invoke("CancelRedBlink", 0); //在 time 秒后调用 methodName 方法。
+        enemy.fx.Invoke("CancelColorChange", 0); //在 time 秒后调用 methodName 方法。
     }
 
     public override void Update()

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class EntityFX : MonoBehaviour
@@ -11,18 +12,27 @@ public class EntityFX : MonoBehaviour
     [SerializeField] private float flashDuration;
     private Material originalMat;
 
+    [Header("Ailment colors")]
+    [SerializeField] private Color chillColor;
+    [SerializeField] private Color[] igniteColor;
+    [SerializeField] private Color[] shockColor;
+
     private void Start()
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         originalMat = sr.material;
     }
+
     // µÃÂ…¡À∏∫Ø ˝
     private IEnumerator FlashFX()
     {
         sr.material = hitMat;
+        Color currentColor = sr.color;
+        sr.color = Color.white;
 
         yield return new WaitForSeconds(flashDuration);
 
+        sr.color = currentColor;
         sr.material = originalMat;
     }
 
@@ -34,7 +44,25 @@ public class EntityFX : MonoBehaviour
             sr.color = Color.red;
     }
 
-    private void CancelRedBlink()
+    public void IgniteFxFor(float _seconds)
+    {
+        InvokeRepeating("IgniteColorFx", 0, .2f);
+        Invoke("CancelColorChange", _seconds);
+    }
+
+    private void IgniteColorFx()
+    {
+        if (sr.color != igniteColor[0])
+        {
+            sr.color = igniteColor[0];
+        }
+        else
+        {
+            sr.color = igniteColor[1];
+        }
+    }
+
+    private void CancelColorChange()
     {
         CancelInvoke();
         sr.color = Color.white;
