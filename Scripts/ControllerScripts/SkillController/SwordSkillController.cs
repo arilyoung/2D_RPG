@@ -210,7 +210,8 @@ public class SwordSkillController : MonoBehaviour
     //该技能状态下攻击敌方造成僵直
     private void SwordSkillDamage(Enemy enemy)
     {
-        enemy.DamageEffect();
+        player.stats.DoDamage(enemy.GetComponent<CharacterStats>());
+        enemy.DamageImpact();
         enemy.StartCoroutine("FreezeTimeFor", freezeTimeDuration);
     }
 

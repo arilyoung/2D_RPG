@@ -27,13 +27,16 @@ public class CharacterStats : MonoBehaviour
     public Stat lightingDamage; //雷系魔法伤害
 
     public bool isIgnited; //火系状态 持续造成伤害
-    public bool isChilled; //冰系状态 冻结敌人 削减护甲值 30%
-    public bool isShocked; //雷系状态 削弱敌人命中率 30% （暂定）
+    public bool isChilled; //冰系状态 冻结敌人 削减护甲值 30%（未实现）
+    public bool isShocked; //雷系状态 使敌人感电 造成传导伤害
 
     private float ignitedTimer; //燃烧持续时间
     private float ignitedDamageCooldown = .2f; //燃烧伤害造成间隔
     private float ignitedDamageTimer;
     private float ignitedDamage;
+
+    [SerializeField] private GameObject shockStrikePrefab;
+    private float shockDamage;
 
     private float chilledTimer;
     private float shockedTimer;
@@ -41,6 +44,8 @@ public class CharacterStats : MonoBehaviour
     public int currentHealth;
 
     public System.Action onHealthChanged;
+
+    protected bool isDead;
 
     protected virtual void Start()
     {
@@ -53,10 +58,12 @@ public class CharacterStats : MonoBehaviour
 
     void Update()
     {
+        //各状态计时
         ignitedTimer -= Time.deltaTime;
         chilledTimer -= Time.deltaTime;
         shockedTimer -= Time.deltaTime;
 
+        //火元素负面多段伤害间隔计时
         ignitedDamageTimer -= Time.deltaTime;
 
         if (ignitedTimer < 0)
@@ -68,16 +75,12 @@ public class CharacterStats : MonoBehaviour
         if (shockedTimer < 0)
             isShocked = false;
 
-
-        if (ignitedDamageTimer < 0 && isIgnited)
-        {
-            DecreaseHealthBy((int)ignitedDamage);
-            ignitedDamageTimer = ignitedDamageCooldown;
-
-            if (currentHealth <= 0)
-                Die();
-        }
+        //造成火元素负面伤害
+        if (isIgnited)
+            ApplyIgniteDamage();
     }
+
+    #region 魔法以及负面效果
     //计算魔法伤害函数 （并且施加元素负面函数）
     public virtual void DoMagicDamage(CharacterStats _targetStats)
     {
@@ -123,12 +126,14 @@ public class CharacterStats : MonoBehaviour
         if (canApplyIgnite)
             _targetStats.SetupIgniteDamage(Mathf.RoundToInt(_fireDamage * .2f));
 
+        if (canApplyShock)
+            _targetStats.SetupShockStrikeDamage(Mathf.RoundToInt(_lightingDamage * .5f));
+
         _targetStats.ApplyElementDebuff(canApplyIgnite, canApplyChill, canApplyShock);
 
-        if (currentHealth <= 0)
+        if (currentHealth <= 0 && !isDead)
             Die();
     }
-
     //承受魔法伤害 魔抗值计算后伤害 函数
     private static float CheckTargetMagicResistance(CharacterStats _targetStats, float totalMagicDamage)
     {
@@ -142,30 +147,104 @@ public class CharacterStats : MonoBehaviour
     //元素负面效果
     public void ApplyElementDebuff(bool _ignited, bool _chill, bool _shock)
     {
-        //元素负面效果不叠加
-        if (isIgnited || isChilled || isShocked)
-            return;
+        //元素负面效果不异类叠加
+        bool canApplyIgnite = !isChilled && !isShocked;
+        bool canApplyChill = !isIgnited && !isShocked;
+        bool canApplyShock = !isIgnited && !isChilled;
 
-        if(_ignited)
+        if(_ignited && canApplyIgnite)
         {
             isIgnited = _ignited;
             ignitedTimer = 4;
-
+            //火元素视觉效果
             fx.IgniteFxFor(ignitedTimer);
         }
-        if(_chill)
+        if(_chill && canApplyChill)
         {
             isChilled = _chill;
-            chilledTimer = 4;
+            chilledTimer = 3;
+            //冰元素视觉效果
+            fx.ChillFxFor(chilledTimer);
         }
-        if(_shock)
+        if(_shock && canApplyShock)
         {
-            isShocked = _shock;
-            shockedTimer = 4;
+            if(!isShocked)
+            {
+                ApplyShock(_shock);
+            }
+            else
+            {
+                HitNearestEnemyWithStrike();
+            }
         }
     }
+    //火元素持续灼烧
+    private void ApplyIgniteDamage()
+    {
+        if (ignitedDamageTimer < 0)
+        {
+            DecreaseHealthBy((int)ignitedDamage);
+            ignitedDamageTimer = ignitedDamageCooldown;
 
+            if (currentHealth <= 0 && !isDead)
+                Die();
+        }
+    }
+    //雷元素传递效果
+    public void ApplyShock(bool _shock)
+    {
+        if (isShocked)
+            return;
+
+        isShocked = _shock;
+        shockedTimer = 4;
+        //电元素视觉效果
+        fx.ShockFxFor(shockedTimer);
+    }
+    //攻击最近敌人
+    private void HitNearestEnemyWithStrike()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(transform.position, 15);
+
+        float closestDistance = Mathf.Infinity;
+        Transform closestEnemy = null;
+
+        foreach (var hit in colliders)
+        {
+            //当命中玩家时 防止射出闪电打自己
+            if (hit.GetComponent<Player>() != null && hit.transform == transform)
+                return;
+            
+            if (hit.GetComponent<Enemy>() != null && hit.transform != transform)
+            {
+                float distanceToEnemy = Vector2.Distance(transform.position, hit.transform.position);
+
+                if (distanceToEnemy < closestDistance)
+                {
+                    closestDistance = distanceToEnemy;
+                    closestEnemy = hit.transform;
+                }
+            }
+        }
+        //只有一个敌人的时候也会打击
+        if (closestEnemy == null)
+            closestEnemy = transform;
+        //生成电击预制体打击最近的敌人
+        if (closestEnemy != null)
+        {
+            GameObject newShockStirke = Instantiate(shockStrikePrefab, transform.position, Quaternion.identity);
+
+            newShockStirke.GetComponent<ShockStrike_Controller>().Setup((int)shockDamage, closestEnemy.GetComponent<CharacterStats>());
+        }
+    }
+    #endregion
+
+    #region 负面元素伤害应用
+    //设置火元素负面效果伤害
     public void SetupIgniteDamage(int _damage) => ignitedDamage = _damage;
+    //设置雷元素负面效果伤害
+    public void SetupShockStrikeDamage(int _damage) => shockDamage = _damage;
+    #endregion
 
     #region 物理伤害计算
     //计算物理伤害函数
@@ -186,11 +265,23 @@ public class CharacterStats : MonoBehaviour
         totalDamage = CheckTargetArmor(_targetStats, totalDamage);
 
         //造成伤害
-        //_targetStats.TakeDamage(totalDamage);
-        DoMagicDamage(_targetStats);
+        _targetStats.TakeDamage(totalDamage);
     }
+    //计算反击伤害函数(三倍物理伤害)
+    public virtual void DoCounterAttackDamage(CharacterStats _targetStats)
+    {
+        if (TargetCanAvoidAttack(_targetStats))
+            return;
 
+        int totalDamage = (damage.GetValue() + strength.GetValue()) * 3;
 
+        if (CanCrit())
+            totalDamage = CalculateCriticalDamage(totalDamage);
+
+        totalDamage = CheckTargetArmor(_targetStats, totalDamage);
+
+        _targetStats.TakeDamage(totalDamage);
+    }
     //能否暴击判断
     private bool CanCrit()
     {
@@ -225,7 +316,9 @@ public class CharacterStats : MonoBehaviour
     {
         DecreaseHealthBy(_damage);
 
-        if (currentHealth <= 0)
+        GetComponent<Entity>().DamageImpact();
+
+        if (currentHealth <= 0 && !isDead)
             Die();
     }
     //闪避攻击函数
@@ -243,6 +336,7 @@ public class CharacterStats : MonoBehaviour
         return false;
     }
     #endregion
+
     //最大血量上限函数
     public int GetMaxHealthValue()
     {
@@ -255,9 +349,9 @@ public class CharacterStats : MonoBehaviour
         if (onHealthChanged != null)
             onHealthChanged();
     }
-
     //实体死亡函数
     protected virtual void Die()
     {
+        isDead = true;
     }
 }

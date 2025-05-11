@@ -54,13 +54,15 @@ public class Entity : MonoBehaviour
 
     protected virtual void Update()
     {
-
+        
     }
 
-    //攻击命中 伤害函数
-    public virtual void DamageEffect()
+    //攻击命中 受击特效函数
+    public virtual void DamageImpact()
     {
+        //受击闪烁
         fx.StartCoroutine("FlashFX");
+        //受击后退
         StartCoroutine("HitKnockback");
     }
 
@@ -135,14 +137,6 @@ public class Entity : MonoBehaviour
             Flip();
     }
     #endregion
-
-    public void MakeTransparent(bool _transparent)
-    {
-        if (_transparent)
-            sr.color = Color.clear;
-        else
-            sr.color = Color.white;
-    }
 
     public virtual void Die()
     {

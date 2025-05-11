@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
+    //保证一个类只有一个实例 并且设置访问该实例的全局访问点 
     public static PlayerManager instance;
     public Player player;
 

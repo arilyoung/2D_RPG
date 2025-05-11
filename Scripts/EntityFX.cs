@@ -13,7 +13,7 @@ public class EntityFX : MonoBehaviour
     private Material originalMat;
 
     [Header("Ailment colors")]
-    [SerializeField] private Color chillColor;
+    [SerializeField] private Color[] chillColor;
     [SerializeField] private Color[] igniteColor;
     [SerializeField] private Color[] shockColor;
 
@@ -21,6 +21,14 @@ public class EntityFX : MonoBehaviour
     {
         sr = GetComponentInChildren<SpriteRenderer>();
         originalMat = sr.material;
+    }
+
+    public void MakeTransparent(bool _transparent)
+    {
+        if (_transparent)
+            sr.color = Color.clear;
+        else
+            sr.color = Color.white;
     }
 
     // µÃÂ…¡À∏∫Ø ˝
@@ -50,21 +58,43 @@ public class EntityFX : MonoBehaviour
         Invoke("CancelColorChange", _seconds);
     }
 
+    public void ChillFxFor(float _seconds)
+    {
+        InvokeRepeating("ChillColorFx", 0, .2f);
+        Invoke("CancelColorChange", _seconds);
+    }
+
+    public void ShockFxFor(float _seconds)
+    {
+        InvokeRepeating("ShockColorFx", 0, .2f);
+        Invoke("CancelColorChange", _seconds);
+    }
+
     private void IgniteColorFx()
     {
         if (sr.color != igniteColor[0])
-        {
             sr.color = igniteColor[0];
-        }
         else
-        {
             sr.color = igniteColor[1];
-        }
     }
-
+    private void ShockColorFx()
+    {
+        if (sr.color != shockColor[0])
+            sr.color = shockColor[0];
+        else
+            sr.color = shockColor[1];
+    }
+    private void ChillColorFx()
+    {
+        if (sr.color != chillColor[0])
+            sr.color = chillColor[0];
+        else
+            sr.color = chillColor[1];
+    }
     private void CancelColorChange()
     {
         CancelInvoke();
         sr.color = Color.white;
     }
+
 }

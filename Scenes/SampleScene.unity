@@ -4363,10 +4363,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   hitMat: {fileID: 2100000, guid: e6554501f58cf1346aa7e6ed4ca8807b, type: 2}
-  flashDuration: 0.15
-  chillColor: {r: 0, g: 0, b: 0, a: 0}
-  igniteColor: []
-  shockColor: []
+  flashDuration: 0.2
+  chillColor:
+  - {r: 0.10980392, g: 0.49803922, b: 1, a: 1}
+  - {r: 0.10980392, g: 0.49803922, b: 1, a: 1}
+  igniteColor:
+  - {r: 1, g: 0.42745098, b: 0.24313726, a: 1}
+  - {r: 1, g: 0.806206, b: 0.740566, a: 1}
+  shockColor:
+  - {r: 0.990566, g: 0.8771479, b: 0, a: 1}
+  - {r: 1, g: 0.98911464, b: 0.7877358, a: 1}
 --- !u!114 &297960819
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4424,6 +4430,7 @@ MonoBehaviour:
   isIgnited: 0
   isChilled: 0
   isShocked: 0
+  shockStrikePrefab: {fileID: 1358227246949954880, guid: b3b97dd5b48057a43be63e44bc86c0b7, type: 3}
   currentHealth: 0
 --- !u!1 &306159476
 GameObject:
@@ -12944,7 +12951,7 @@ Transform:
   m_GameObject: {fileID: 921360185}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -13032,7 +13039,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0cd44c1031e13a943bb63640046fad76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_UiScaleMode: 0
+  m_UiScaleMode: 1
   m_ReferencePixelsPerUnit: 100
   m_ScaleFactor: 1
   m_ReferenceResolution: {x: 800, y: 600}
@@ -13052,8 +13059,8 @@ Canvas:
   m_GameObject: {fileID: 966444882}
   m_Enabled: 1
   serializedVersion: 3
-  m_RenderMode: 0
-  m_Camera: {fileID: 0}
+  m_RenderMode: 1
+  m_Camera: {fileID: 519420031}
   m_PlaneDistance: 100
   m_PixelPerfect: 0
   m_ReceivesEvents: 1
@@ -13063,8 +13070,8 @@ Canvas:
   m_VertexColorAlwaysGammaSpace: 0
   m_AdditionalShaderChannelsFlag: 0
   m_UpdateRectTransformForStandalone: 0
-  m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: -1346188839
+  m_SortingOrder: 100
   m_TargetDisplay: 0
 --- !u!114 &966444887
 MonoBehaviour:
@@ -13810,7 +13817,7 @@ Transform:
   m_GameObject: {fileID: 1853029658}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -9, y: 1.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -14006,7 +14013,7 @@ Transform:
   m_GameObject: {fileID: 1940808519}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -63.61, y: -3.27, z: -0.16604471}
+  m_LocalPosition: {x: -63, y: 0.4, z: -0.16604471}
   m_LocalScale: {x: 1.2, y: 1.2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -14104,11 +14111,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hitMat: {fileID: 2100000, guid: e6554501f58cf1346aa7e6ed4ca8807b, type: 2}
   flashDuration: 0.2
-  chillColor: {r: 0.19339621, g: 0.74764997, b: 1, a: 1}
+  chillColor:
+  - {r: 0.10980392, g: 0.49803922, b: 1, a: 1}
+  - {r: 0.10980392, g: 0.49803922, b: 1, a: 1}
   igniteColor:
   - {r: 1, g: 0.42745098, b: 0.24313726, a: 1}
   - {r: 1, g: 0.806206, b: 0.740566, a: 1}
-  shockColor: []
+  shockColor:
+  - {r: 0.990566, g: 0.8771479, b: 0, a: 1}
+  - {r: 1, g: 0.98911464, b: 0.7877358, a: 1}
 --- !u!114 &1940808525
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -14161,11 +14172,12 @@ MonoBehaviour:
     baseValue: 0
     modifiers: 
   lightingDamage:
-    baseValue: 0
+    baseValue: 10
     modifiers: 
   isIgnited: 0
   isChilled: 0
   isShocked: 0
+  shockStrikePrefab: {fileID: 1358227246949954880, guid: b3b97dd5b48057a43be63e44bc86c0b7, type: 3}
   currentHealth: 0
 --- !u!114 &1940808526
 MonoBehaviour:
@@ -14238,7 +14250,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -200, y: 160}
+  m_AnchoredPosition: {x: -280, y: 200}
   m_SizeDelta: {x: 220, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1984422941

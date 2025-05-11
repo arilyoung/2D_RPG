@@ -14,6 +14,8 @@ public class EnemySkeletonStunnedState : EnemyState
     {
         base.Enter();
 
+        PlayerManager.instance.player.stats.DoCounterAttackDamage(enemy.GetComponent<CharacterStats>());
+
         enemy.fx.InvokeRepeating("RedColorBlink", 0, .1f);
 
         stateTimer = enemy.stunDuration;//stunned持续时间
