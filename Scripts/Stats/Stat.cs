@@ -20,18 +20,18 @@ public class Stat
 
         return finalValue;
     }
-
+    //设置默认初始值
     public void SetDefultValue(int _value)
     {
         baseValue = _value;
     }
-
+    //添加修改值
     public  void AddModifier(int _modifier)
     {
         modifiers.Add(_modifier);
     }
-
-    public void RemoveModifirer(int _modifier)
+    //移除修改值
+    public void RemoveModifier(int _modifier)
     {
         modifiers.Remove(_modifier);
     }

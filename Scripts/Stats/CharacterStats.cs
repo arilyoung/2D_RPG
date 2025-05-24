@@ -308,6 +308,9 @@ public class CharacterStats : MonoBehaviour
         else
             totalDamage -= _targetStats.armor.GetValue();
 
+        if (totalDamage <= 0)
+            totalDamage = 1;
+
         totalDamage = Mathf.Clamp(totalDamage, 0, int.MaxValue);
         return totalDamage;
     }
