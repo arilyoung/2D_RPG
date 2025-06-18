@@ -25,6 +25,10 @@ public class PlayerAnimationTriggers : MonoBehaviour
                 EnemyStats _target = hit.GetComponent<EnemyStats>();
                 //对 ES 脚本 DoDamage
                 player.stats.DoDamage(_target);
+
+                //如果有武器附魔
+                if (Inventory.instance.GetEquipment(EquipmentType.Weapon) != null)
+                    Inventory.instance.GetEquipment(EquipmentType.Weapon).ItemEnchanting(_target.transform);
             }
         }
     }

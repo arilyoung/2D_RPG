@@ -10,18 +10,20 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d2d767f9a6ffb8479be17ddf4706124, type: 3}
-  m_Name: WoodenSword
+  m_Name: ThunderSword
   m_EditorClassIdentifier: 
   itemType: 1
-  itemName: WoodenSword
-  icon: {fileID: 1025091068, guid: a9ca9a41598dd2e44b125928045c518f, type: 3}
+  itemName: ThunderSword
+  icon: {fileID: -671158514, guid: a9ca9a41598dd2e44b125928045c518f, type: 3}
   equipmentType: 0
+  itemEnchantings:
+  - {fileID: 11400000, guid: f305cb9967baad245b88da8a06bd6fe9, type: 2}
   strength: 0
   agility: 0
   intelligence: 0
   vitality: 0
   damage: 5
-  critChance: 5
+  critChance: 0
   critPower: 0
   maxHealth: 0
   evasion: 0
@@ -29,4 +31,5 @@ MonoBehaviour:
   magicResistence: 0
   fireDamage: 0
   iceDamage: 0
-  lightingDamage: 0
+  lightingDamage: 5
+  craftingMaterials: []

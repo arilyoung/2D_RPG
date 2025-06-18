@@ -159,13 +159,14 @@ public class Inventory : MonoBehaviour
     {
         if (_item.itemType == ItemType.Equipment)
         {
-            RemoveFormAddBoth(_item);
             if (inventoryEquipmentDictionary.TryGetValue(_item, out InventoryItem value))
             {
                 if (value.stackCount <= 1)
                 {
                     inventoryEquipment.Remove(value);
                     inventoryEquipmentDictionary.Remove(_item);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item);
                 }
                 else
                     value.RemoveFromStack();
@@ -173,13 +174,14 @@ public class Inventory : MonoBehaviour
         }
         else if (_item.itemType == ItemType.Material)
         {
-            RemoveFormAddBoth(_item);
             if (inventoryMaterialDictionary.TryGetValue(_item, out InventoryItem value))
             {
                 if (value.stackCount <= 1)
                 {
                     inventoryMaterial.Remove(value);
                     inventoryMaterialDictionary.Remove(_item);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item);
                 }
                 else
                     value.RemoveFromStack();
@@ -188,18 +190,91 @@ public class Inventory : MonoBehaviour
         UpdateSlotsUI();
     }
 
-    private void RemoveFormAddBoth(ItemData _item)
+    public void RemoveItemByCount(InventoryItem _item)
     {
-        if (inventoryDictionary.TryGetValue(_item, out InventoryItem valueForBoth))
+  
+        if (_item.data.itemType == ItemType.Equipment)
         {
-            if (valueForBoth.stackCount <= 1)
+            if (inventoryEquipmentDictionary.TryGetValue(_item.data, out InventoryItem value))
             {
-                inventory.Remove(valueForBoth);
-                inventoryDictionary.Remove(_item);
+                value.stackCount -= _item.stackCount;
+                if (value.stackCount <= 0)
+                {
+                    inventoryEquipment.Remove(value);
+                    inventoryEquipmentDictionary.Remove(_item.data);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item.data);
+
+                }
             }
-            else
-                valueForBoth.RemoveFromStack();
         }
+        else if (_item.data.itemType == ItemType.Material)
+        {
+            //RemoveFormAddBoth(_item.data);
+            if (inventoryMaterialDictionary.TryGetValue(_item.data, out InventoryItem value))
+            {
+                value.stackCount -= _item.stackCount;
+                if (value.stackCount <= 0)
+                {
+                    inventoryMaterial.Remove(value);
+                    inventoryMaterialDictionary.Remove(_item.data);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item.data);
+                }
+            }
+        }
+        UpdateSlotsUI();
+    }
+
+    public bool CanCraft(ItemEquipmentData _itemToCraft, List<InventoryItem> _requiredMaterials)
+    {
+        //要被消耗的材料
+        List<InventoryItem> materialsToRemove = new List<InventoryItem>();
+        //检测是否有足够的材料
+        for (int i = 0; i < _requiredMaterials.Count; i++)
+        {
+            //检测单个材料是否存在
+            if(inventoryDictionary.TryGetValue(_requiredMaterials[i].data, out InventoryItem value))
+            {
+                //如果材料数量不足，则返回false
+                if(value.stackCount < _requiredMaterials[i].stackCount)
+                {
+                    return false;
+                }
+                else
+                {
+                    materialsToRemove.Add(_requiredMaterials[i]);
+                }
+            }
+            //如果材料不存在，则返回false
+            else
+            {
+                return false;
+            }
+        }
+        //消耗材料
+        for (int i = 0; i < materialsToRemove.Count; i++) 
+        {
+            Debug.Log("Removing " + materialsToRemove[i].data.name + " " + materialsToRemove[i].stackCount);
+            RemoveItemByCount(materialsToRemove[i]);
+        }
+        //添加新物品 
+        AddItem(_itemToCraft);
+
+        return true;
+    }
+
+    public ItemEquipmentData GetEquipment(EquipmentType _type)
+    {
+        ItemEquipmentData equipedItem = null;
+
+        foreach (KeyValuePair<ItemEquipmentData, InventoryItem> item in equipmentDictionary)
+        {
+            if(item.Key.equipmentType == _type)
+                equipedItem = item.Key;
+        }
+
+        return equipedItem;
     }
 }
 

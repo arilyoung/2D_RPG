@@ -2,8 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlakcholeSkill : Skill
+public class BlackholeSkill : Skill
 {
+    public static BlackholeSkill instance;
+
     [SerializeField] private int amountOfAttacks;
     [SerializeField] private float cloneCooldown;
     [Space]
@@ -11,9 +13,18 @@ public class BlakcholeSkill : Skill
     [SerializeField] private float maxSize;
     [SerializeField] private float growSpeed;
     [SerializeField] private float shrinkSpeed;
-    public override bool CanUseSkill()
+
+    private void Awake()
     {
-        return base.CanUseSkill();
+        if (instance != null)
+            Destroy(instance.gameObject);
+        else
+            instance = this;
+    }
+
+    public override bool UseSkillTrigger()
+    {
+        return base.UseSkillTrigger();
     }
 
     public override void UseSkill()

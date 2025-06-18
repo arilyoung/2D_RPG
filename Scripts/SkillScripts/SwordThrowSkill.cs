@@ -10,6 +10,8 @@ public enum SwordType
 
 public class SwordThrowSkill : Skill
 {
+    public static SwordThrowSkill instance;
+
     public SwordType swordType = SwordType.Regular;
 
     [Header("Aim Arrow")]
@@ -44,8 +46,19 @@ public class SwordThrowSkill : Skill
     private GameObject[] arrows;
     private float angleDegrees;
     private Vector2 arrowDir;
+
+    private void Awake()
+    {
+        if (instance != null)
+            Destroy(instance.gameObject);
+        else
+            instance = this;
+    }
+
     protected override void Start()
     {
+        bounceAmount -= 1;
+
         player = PlayerManager.instance.player;
 
         SetupGravity();
@@ -71,12 +84,25 @@ public class SwordThrowSkill : Skill
                 break;
         }
     }
+    public override bool CanUseSkill()
+    {
+        return base.CanUseSkill();
+    }
+
+    public override bool UseSkillTrigger()
+    {
+        return base.UseSkillTrigger();
+    }
+
 
     protected override void Update()
     {
-        //右键抬起
+        base.Update();
+
         if (Input.GetKeyUp(KeyCode.Mouse1))
         {
+
+
             finalDir = new Vector2(AimDirection().normalized.x * launchForce.x,
                                    AimDirection().normalized.y * launchForce.y);
             ArrowsActive(false);
@@ -98,6 +124,14 @@ public class SwordThrowSkill : Skill
             }
         }
     }
+
+
+    public override void UseSkill()
+    {
+        base.UseSkill();
+    }
+
+
     //剑的创建
     public void CreateSword()
     {

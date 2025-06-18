@@ -9,6 +9,7 @@ public class CharacterStats : MonoBehaviour
     public Stat agility; //敏捷 增强闪避率 暴击率 百分比增加
     public Stat intelligence; //智力 增强魔法伤害 魔法抵抗 百分比增加
     public Stat vitality; //体力 增强生命值 数值增加
+    public Stat Lucky; //幸运 数值增加
 
     [Header("Offensive stats")]
     public Stat damage; //基础伤害
@@ -36,7 +37,7 @@ public class CharacterStats : MonoBehaviour
     private float ignitedDamage;
 
     [SerializeField] private GameObject shockStrikePrefab;
-    private float shockDamage;
+    private int shockDamage;
 
     private float chilledTimer;
     private float shockedTimer;
@@ -46,6 +47,10 @@ public class CharacterStats : MonoBehaviour
     public System.Action onHealthChanged;
 
     protected bool isDead;
+
+    //外部调用的伤害
+    public int finalDamage;
+    public int finalMagicDamage;
 
     protected virtual void Start()
     {
@@ -91,6 +96,8 @@ public class CharacterStats : MonoBehaviour
         float totalMagicDamage = _fireDamage + _iceDamage + _lightingDamage + intelligence.GetValue();
         totalMagicDamage = CheckTargetMagicResistance(_targetStats, totalMagicDamage);
 
+        finalMagicDamage = (int)totalMagicDamage;
+
         _targetStats.TakeDamage((int)totalMagicDamage);
 
         if (Mathf.Max(_fireDamage, _iceDamage, _lightingDamage) <= 0)
@@ -127,7 +134,7 @@ public class CharacterStats : MonoBehaviour
             _targetStats.SetupIgniteDamage(Mathf.RoundToInt(_fireDamage * .2f));
 
         if (canApplyShock)
-            _targetStats.SetupShockStrikeDamage(Mathf.RoundToInt(_lightingDamage * .5f));
+            _targetStats.SetupShockStrikeDamage(Mathf.RoundToInt(_lightingDamage * 2f));
 
         _targetStats.ApplyElementDebuff(canApplyIgnite, canApplyChill, canApplyShock);
 
@@ -234,7 +241,7 @@ public class CharacterStats : MonoBehaviour
         {
             GameObject newShockStirke = Instantiate(shockStrikePrefab, transform.position, Quaternion.identity);
 
-            newShockStirke.GetComponent<ShockStrike_Controller>().Setup((int)shockDamage, closestEnemy.GetComponent<CharacterStats>());
+            newShockStirke.GetComponent<ShockStrikeController>().Setup(shockDamage, closestEnemy.GetComponent<CharacterStats>());
         }
     }
     #endregion
@@ -263,6 +270,8 @@ public class CharacterStats : MonoBehaviour
 
         //计算护甲削弱后伤害
         totalDamage = CheckTargetArmor(_targetStats, totalDamage);
+
+        finalDamage = totalDamage;
 
         //造成伤害
         _targetStats.TakeDamage(totalDamage);
@@ -344,6 +353,17 @@ public class CharacterStats : MonoBehaviour
     public int GetMaxHealthValue()
     {
         return maxHealth.GetValue() + vitality.GetValue() * 5;
+    }
+    //血量上升函数
+    public virtual void IncreaseHealthBy(int _healthNumber)
+    {
+        currentHealth += _healthNumber;
+        
+        if (currentHealth > GetMaxHealthValue())
+            currentHealth = GetMaxHealthValue();
+
+        if (onHealthChanged != null)
+            onHealthChanged();
     }
     //血量下降函数
     protected virtual void DecreaseHealthBy(int _damage)

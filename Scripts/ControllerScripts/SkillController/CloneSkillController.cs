@@ -62,6 +62,12 @@ public class CloneSkillController : MonoBehaviour
             {
                 PlayerManager.instance.player.stats.DoMagicDamage(hit.GetComponent<CharacterStats>());
                 hit.GetComponent<Enemy>().DamageImpact();
+
+                ItemEquipmentData equipedAmulet = Inventory.instance.GetEquipment(EquipmentType.Amulet);
+                if (equipedAmulet != null)
+                {
+                    equipedAmulet.ItemEnchanting(hit.transform);
+                }
             }
         }
     }

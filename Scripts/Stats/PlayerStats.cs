@@ -6,10 +6,12 @@ public class PlayerStats : CharacterStats
 {
     private Player player;
 
+
     protected override void Start()
     {
         base.Start();
-
+        //玩家基础幸运值
+        Lucky.AddModifier(1);
         player = GetComponent<Player>();
     }
 

@@ -50,7 +50,7 @@ public class PlayerBlackholeState : PlayerState
 
             if(!skillUsed)
             {
-                if (player.skill.blakcholeSkill.CanUseSkill())
+                if (player.skill.blakcholeSkill.UseSkillTrigger())
                     skillUsed = true;
             }
         }

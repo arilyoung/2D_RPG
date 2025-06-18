@@ -5,18 +5,22 @@ using UnityEngine;
 public class EnemyStats : CharacterStats
 {
     private Enemy enemy;
+    private ItemDrop enemyDropSystem;
 
     [Header("Enemy Level")]
-    [SerializeField] private int level = 1;
+    public int level = 1;
     [SerializeField] private float percentageModifier = .25f;
+
+
+
 
     protected override void Start()
     {
         ApplyLevelModifer();
-
         base.Start();
 
         enemy = GetComponent<Enemy>();
+        enemyDropSystem = GetComponent<ItemDrop>();
     }
 
     private void ApplyLevelModifer()
@@ -33,7 +37,6 @@ public class EnemyStats : CharacterStats
             modifier += percentageModifier;
         }
         modifier *= _stat.GetValue();
-        Debug.Log(level + " modifier: " + modifier);
         _stat.AddModifier(Mathf.RoundToInt(modifier));
     }
 
@@ -45,7 +48,8 @@ public class EnemyStats : CharacterStats
     protected override void Die()
     {
         base.Die();
-
         enemy.Die();
+
+        enemyDropSystem.GenerateDrop();
     }
 }

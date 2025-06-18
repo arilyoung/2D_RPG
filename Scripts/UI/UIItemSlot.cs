@@ -44,11 +44,16 @@ public class UIItemSlot : MonoBehaviour , IPointerDownHandler
     //鼠标点击事件 (接口)
     public virtual void OnPointerDown(PointerEventData eventData)
     {
-        if (item == null)
+        if (item == null || item.data == null)
+            return;
+
+        if(Input.GetKey(KeyCode.LeftControl))
         {
+            Inventory.instance.RemoveItem(item.data);
             return;
         }
-        else if (item.data.itemType == ItemType.Equipment)
+
+        if (item.data.itemType == ItemType.Equipment)
             Inventory.instance.EquiptItem(item.data);
     }
 }

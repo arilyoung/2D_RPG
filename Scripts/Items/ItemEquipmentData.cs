@@ -15,6 +15,8 @@ public class ItemEquipmentData : ItemData
 {
     public EquipmentType equipmentType;
 
+    public ItemEnchanting[] itemEnchantings;
+
     [Header("Major stats")]
     public int strength; //力量 增强伤害 百分比增加
     public int agility; //敏捷 增强闪避率 暴击率 百分比增加
@@ -36,6 +38,10 @@ public class ItemEquipmentData : ItemData
     public int fireDamage; //火系魔法伤害
     public int iceDamage; //冰系魔法伤害
     public int lightingDamage; //雷系魔法伤害
+
+    [Header("Craft requirements")]
+    public List<InventoryItem> craftingMaterials; //合成材料
+
 
     public void AddModifiers()
     {
@@ -81,5 +87,14 @@ public class ItemEquipmentData : ItemData
         playerStats.fireDamage.RemoveModifier(fireDamage);
         playerStats.iceDamage.RemoveModifier(iceDamage);
         playerStats.lightingDamage.RemoveModifier(lightingDamage);
+    }
+
+    //执行附魔列表
+    public void ItemEnchanting(Transform _enemyPosition)
+    {
+        foreach (var item in itemEnchantings)
+        {
+            item.ExecuteEnchanting(_enemyPosition);
+        }
     }
 }

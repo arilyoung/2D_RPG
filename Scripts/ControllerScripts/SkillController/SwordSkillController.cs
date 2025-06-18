@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Burst.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 
@@ -210,7 +211,20 @@ public class SwordSkillController : MonoBehaviour
     //该技能状态下攻击敌方造成僵直
     private void SwordSkillDamage(Enemy enemy)
     {
-        player.stats.DoDamage(enemy.GetComponent<CharacterStats>());
+
+        ItemEquipmentData equipedAmulet = Inventory.instance.GetEquipment(EquipmentType.Amulet);
+        if (equipedAmulet != null)
+        {
+            if (equipedAmulet.itemName == "Amulet of God")
+            {
+                equipedAmulet.ItemEnchanting(enemy.transform);
+                player.stats.DoMagicDamage(enemy.GetComponent<CharacterStats>());
+            }
+        }
+        else
+        {
+            player.stats.DoDamage(enemy.GetComponent<CharacterStats>());
+        }
         enemy.DamageImpact();
         enemy.StartCoroutine("FreezeTimeFor", freezeTimeDuration);
     }

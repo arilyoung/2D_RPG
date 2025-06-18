@@ -2,11 +2,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShockStrike_Controller : MonoBehaviour
+public class ShockStrikeController : MonoBehaviour
 {
     [SerializeField] private CharacterStats targetStats;
     [SerializeField] private float speed;
-    [SerializeField] private int damage; 
+    [SerializeField] private int damage;
 
     private Animator anim;
     private bool triggered;

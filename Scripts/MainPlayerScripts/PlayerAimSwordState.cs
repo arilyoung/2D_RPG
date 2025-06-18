@@ -13,6 +13,8 @@ public class PlayerAimSwordState : PlayerState
         base.Enter();
 
         player.skill.swordThrowSkill.ArrowsActive(true);
+
+        SwordThrowSkill.instance.UseSkillTrigger();
     }
 
     public override void Exit()
@@ -33,5 +35,6 @@ public class PlayerAimSwordState : PlayerState
             player.Flip();
         else if (player.transform.position.x < mousePosition.x && player.facingDir == -1)
             player.Flip();
+
     }
 }

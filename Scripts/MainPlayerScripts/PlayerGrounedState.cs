@@ -8,6 +8,11 @@ public class PlayerGrounedState : PlayerState
     {
     }
 
+    public void Start()
+    {
+
+    }
+
     public override void Enter()
     {
         base.Enter();
@@ -23,7 +28,7 @@ public class PlayerGrounedState : PlayerState
     {
         base.Update();
 
-        if (Input.GetKeyDown(KeyCode.R))
+        if (Input.GetKeyDown(KeyCode.R) && BlackholeSkill.instance.CanUseSkill())
             stateMachine.ChangeState(player.blackholeState);
 
         if (Input.GetKeyDown(KeyCode.Mouse1) && HasNoSword())
