@@ -14,7 +14,7 @@ public class ItemObject : MonoBehaviour
         if (itemData == null)
             return;
         GetComponent<SpriteRenderer>().sprite = itemData.icon;
-        gameObject.name = "Item Obejct - " + itemData.itemName;
+        gameObject.name = "Item Object - " + itemData.itemName;
     }
 
     private void SetupVisuals()
@@ -23,7 +23,7 @@ public class ItemObject : MonoBehaviour
             return;
 
         GetComponent<SpriteRenderer>().sprite = itemData.icon;
-        gameObject.name = "Item Obejct - " + itemData.itemName;
+        gameObject.name = "Item Object - " + itemData.itemName;
     }
 
     private void Update()

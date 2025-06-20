@@ -19,5 +19,5 @@ public class UIEquipmentSlot : UIItemSlot
         Inventory.instance.UnEquipItem(item.data as ItemEquipmentData);
         Inventory.instance.AddItem(item.data as ItemEquipmentData);
         ClearUISlot();
-    }
+    } 
 }

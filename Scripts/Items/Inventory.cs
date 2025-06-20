@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEditor.Progress;
 
 public class Inventory : MonoBehaviour
 {
@@ -10,10 +11,12 @@ public class Inventory : MonoBehaviour
     //列表用来按顺序存储所有物品，以便在UI中按顺序显示每个物品的槽位。
     public List<InventoryItem> inventoryMaterial;
     public List<InventoryItem> inventoryEquipment;
+    public List<InventoryItem> inventoryPotion;
     public List<InventoryItem> inventory;
     //字典的作用是通过ItemData作为键，快速找到对应的InventoryItem实例，从而管理堆叠数量。
     public Dictionary<ItemData, InventoryItem> inventoryMaterialDictionary;
     public Dictionary<ItemData, InventoryItem> inventoryEquipmentDictionary;
+    public Dictionary<ItemData, InventoryItem> inventoryPotionDictionary;
     public Dictionary<ItemData, InventoryItem> inventoryDictionary;
 
     public List<InventoryItem> equipment;
@@ -22,9 +25,11 @@ public class Inventory : MonoBehaviour
     [Header("Inventory UI")]
     [SerializeField] private Transform inventorySlotsParent;
     [SerializeField] private Transform equipmentSlotsParent;
+    [SerializeField] private Transform potionSlotsParent;
 
     private UIItemSlot[] inventoryItemSlots;
     private UIEquipmentSlot[] equipmentSlot;
+    private UIPotionSlot[] potionSlot;
     private void Awake()
     {
         //检查是否有已经存在的Inventory实例
@@ -38,10 +43,14 @@ public class Inventory : MonoBehaviour
     {
         inventoryMaterial = new List<InventoryItem>();
         inventoryEquipment = new List<InventoryItem>();
+        inventoryPotion = new List<InventoryItem>();
+
         inventoryDictionary = new Dictionary<ItemData, InventoryItem>();
         inventoryMaterialDictionary = new Dictionary<ItemData, InventoryItem>();
         inventoryEquipmentDictionary = new Dictionary<ItemData, InventoryItem>();
-        inventory = inventoryEquipment.Concat(inventoryMaterial).ToList();
+        inventoryPotionDictionary = new Dictionary<ItemData, InventoryItem>();
+
+        inventory = inventoryEquipment.Concat(inventoryMaterial).ToList().Concat(inventoryPotion).ToList();
 
         equipment = new List<InventoryItem>();
         equipmentDictionary = new Dictionary<ItemEquipmentData, InventoryItem>();
@@ -49,6 +58,8 @@ public class Inventory : MonoBehaviour
         //获取所有子物体中的UIItemSlot组件
         inventoryItemSlots = inventorySlotsParent.GetComponentsInChildren<UIItemSlot>();
         equipmentSlot = equipmentSlotsParent.GetComponentsInChildren<UIEquipmentSlot>();
+        potionSlot = potionSlotsParent.GetComponentsInChildren<UIPotionSlot>();
+        Debug.Log(potionSlot.Length);
     }
 
     // ?
@@ -97,6 +108,12 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public void ConsumePotion(InventoryItem _item)
+    {
+        RemoveItemByOne(_item);
+        Debug.Log(_item.data.itemType);
+    }
+
     //更新UI
     private void UpdateSlotsUI()
     {
@@ -109,6 +126,11 @@ public class Inventory : MonoBehaviour
             }
         }
 
+        for(int i = 0; i < potionSlot.Length; i++)
+        {
+            potionSlot[i].ClearUISlot();
+        }
+
         for(int i = 0; i < inventoryItemSlots.Length; i++)
         {
             inventoryItemSlots[i].ClearUISlot();
@@ -118,6 +140,8 @@ public class Inventory : MonoBehaviour
             inventoryItemSlots[i].UpdateSlots(inventoryEquipment[i]);
         for(int i = 0; i < inventoryMaterial.Count; i++)
             inventoryItemSlots[inventoryEquipment.Count + i].UpdateSlots(inventoryMaterial[i]);
+        for (int i = 0; i < inventoryPotion.Count; i++)
+            potionSlot[i].UpdateSlots(inventoryPotion[i]);
     }
 
     public void AddItem(ItemData _item)
@@ -151,7 +175,12 @@ public class Inventory : MonoBehaviour
                 inventoryEquipment.Add(newItem);
                 inventoryEquipmentDictionary.Add(_item, newItem);
             }
-            inventory = inventoryEquipment.Concat(inventoryMaterial).ToList();
+            else if (_item.itemType == ItemType.Potion)
+            {
+                inventoryPotion.Add(newItem);
+                inventoryPotionDictionary.Add(_item, newItem);
+            }
+            inventory = inventoryEquipment.Concat(inventoryMaterial).ToList().Concat(inventoryPotion).ToList();
             inventoryDictionary.Add(_item, newItem);
         }
     }
@@ -180,6 +209,21 @@ public class Inventory : MonoBehaviour
                 {
                     inventoryMaterial.Remove(value);
                     inventoryMaterialDictionary.Remove(_item);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item);
+                }
+                else
+                    value.RemoveFromStack();
+            }
+        }
+        else if (_item.itemType == ItemType.Potion)
+        {
+            if (inventoryPotionDictionary.TryGetValue(_item, out InventoryItem value))
+            {
+                if (value.stackCount <= 1)
+                {
+                    inventoryPotion.Remove(value);
+                    inventoryPotionDictionary.Remove(_item);
                     inventory.Remove(value);
                     inventoryDictionary.Remove(_item);
                 }
@@ -220,6 +264,68 @@ public class Inventory : MonoBehaviour
                     inventoryMaterialDictionary.Remove(_item.data);
                     inventory.Remove(value);
                     inventoryDictionary.Remove(_item.data);
+                }
+            }
+        }
+        else if (_item.data.itemType == ItemType.Potion)
+        {
+            if (inventoryPotionDictionary.TryGetValue(_item.data, out InventoryItem value))
+            {
+                value.stackCount -= _item.stackCount;
+                if (value.stackCount <= 0)
+                {
+                    inventoryPotion.Remove(value);
+                    inventoryPotionDictionary.Remove(_item.data);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item.data);
+                }
+            }
+        }
+        UpdateSlotsUI();
+    }
+
+    public void RemoveItemByOne(InventoryItem _item)
+    {
+        if (_item.data.itemType == ItemType.Equipment)
+        {
+            if (inventoryEquipmentDictionary.TryGetValue(_item.data, out InventoryItem value))
+            {
+                value.stackCount--;
+                if (value.stackCount <= 0)
+                {
+                    inventoryEquipment.Remove(value);
+                    inventoryEquipmentDictionary.Remove(_item.data);
+                    inventory.Remove(value);
+                    inventoryDictionary.Remove(_item.data);
+                }
+            }
+        }
+        else if (_item.data.itemType == ItemType.Material)
+        {
+            if (inventoryMaterialDictionary.TryGetValue(_item.data, out InventoryItem value1))
+            {
+                value1.stackCount--;
+                if (value1.stackCount <= 0)
+                {
+                    inventoryMaterial.Remove(value1);
+                    inventoryMaterialDictionary.Remove(_item.data);
+                    inventory.Remove(value1);
+                    inventoryDictionary.Remove(_item.data);
+                }
+            }
+        }
+        else if (_item.data.itemType == ItemType.Potion)
+        {
+            if (inventoryPotionDictionary.TryGetValue(_item.data, out InventoryItem value2))
+            {
+                value2.stackCount--;
+                if (value2.stackCount <= 0)
+                {
+                    inventoryPotion.Remove(value2);
+                    inventoryPotionDictionary.Remove(_item.data);
+                    inventory.Remove(value2);
+                    inventoryDictionary.Remove(_item.data);
+                    Debug.Log(_item.stackCount);
                 }
             }
         }

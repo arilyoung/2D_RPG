@@ -6,6 +6,7 @@ public enum ItemType
 {
     Material,
     Equipment,
+    Potion,
 }
 
 //ScriptableObject 是 Unity 提供的一个数据配置存储基类，
